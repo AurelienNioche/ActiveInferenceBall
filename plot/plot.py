@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def plot_runs(*runs):
+def runs(*args):
     fig, axes = plt.subplots(nrows=2, figsize=(4, 3))
-    for i, r in enumerate(runs):
+    for i, r in enumerate(args):
         policy = r["policy"]
         hist_pos = r["position"]
         hist_vel = r["velocity"]
@@ -42,10 +42,10 @@ def plot_runs(*runs):
     plt.show()
 
 
-def plot_error(runs):
+def error(*args):
 
     fig, ax = plt.subplots(figsize=(3, 3))
-    for i, r in enumerate(runs):
+    for i, r in enumerate(args):
         policy = r["policy"]
         hist_err = r["error"]
         label = policy.replace("-", " ").capitalize()
@@ -68,44 +68,27 @@ def plot_error(runs):
     plt.show()
 
 
-def plot_q(alpha):
-    plt.rcParams[
-        'text.usetex'] = True
-
+def q(alpha, title=r"$\alpha$"):
+    plt.rcParams.update({'text.usetex': True})
     if len(alpha.shape) == 5:
         n_timestep, n_action, n_position, n_velocity, _ = alpha.shape
     elif len(alpha.shape) == 4:
         n_timestep, n_action, n_velocity, _ = alpha.shape
     else:
         raise ValueError
-
     fig, axes = plt.subplots(
         ncols=n_timestep,
         nrows=n_action,
-        figsize=(
-        6,
-        2))
-    fig.suptitle(
-        r"$\alpha$")
+        figsize=(6, 2))
+    fig.suptitle(title)
     if len(alpha.shape) == 4:
-        for a_idx in range(
-                n_action):
-            for t_idx in range(
-                    n_timestep):
-                ax = \
-                axes[a_idx, t_idx]
-                img = alpha[
-                      t_idx,
-                      a_idx,
-                      :,
-                      :]
-                ax.imshow(
-                    img,
-                    aspect="auto")
-                ax.get_xaxis().set_ticks(
-                    [])
-                ax.axes.get_yaxis().set_ticks(
-                    [])
+        for a_idx in range(n_action):
+            for t_idx in range(n_timestep):
+                ax = axes[a_idx, t_idx]
+                img = alpha[t_idx, a_idx, :, :]
+                ax.imshow(img, aspect="auto")
+                ax.get_xaxis().set_ticks([])
+                ax.axes.get_yaxis().set_ticks([])
     elif len(alpha.shape) == 5:
         raise ValueError
 
