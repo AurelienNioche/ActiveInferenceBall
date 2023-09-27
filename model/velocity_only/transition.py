@@ -1,7 +1,5 @@
-import numpy as np
 from scipy.spatial.distance import cdist
-from scipy.stats import \
-    norm
+from scipy.stats import norm
 
 from . base import *
 
@@ -11,8 +9,7 @@ def square_exponential_kernel(x, alpha, length):
 
 
 def sample_action_effect(t, size=1):
-
-    mu = - 0.2 + 0.5*np.cos(6*(t - 2))
+    mu = 0.4 + 1.2 * np.cos(3 * (t - 2))
     alpha = 0.05
     length = 0.1
     sigma = square_exponential_kernel(t, alpha, length)
@@ -44,7 +41,7 @@ def build():
                 new_v += v - friction_factor*v
                 new_v += action_effect[:, t_idx]*a
                 new_v += own_force[:, t_idx]
-                new_v = np.clip(new_v, -max_velocity, max_velocity)
+                new_v = np.clip(new_v, -min(velocity), max(velocity))
                 hist, bins = np.histogram(
                     new_v,
                     bins=list(velocity) + [velocity[-1] + (velocity[-1] - velocity[-2])])
@@ -59,14 +56,17 @@ def build():
                 velocity):
             for p2_idx, p2 in enumerate(
                     position):
+                loc = p + (1 / n_timestep) * v
+                print(loc)
                 transition_position_pvp[
                     p_idx, v_idx, p2_idx
                 ] = norm.pdf(
                     p2,
-                    loc=p + (
-                                1 / n_timestep) * v,
-                    scale=0.1)
-            transition_position_pvp[p_idx, v_idx, :] \
-                /= transition_position_pvp[p_idx, v_idx, :].sum()
+                    loc=loc,
+                    scale=0.01
+                )
+            sum_transition = transition_position_pvp[p_idx, v_idx, :].sum()
+            assert sum_transition > 0, "Sum of transition probabilities is 0"
+            transition_position_pvp[p_idx, v_idx, :] /= sum_transition
 
     return transition_velocity_tavv, transition_position_pvp
