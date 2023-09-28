@@ -9,6 +9,10 @@ def runs(*args):
         hist_pos = r["position"]
         hist_vel = r["velocity"]
 
+        if len(hist_pos.shape) == 3:
+            hist_pos = hist_pos[:, -1, :]   # Take the last learning episode only
+            hist_vel = hist_vel[:, -1, :]   # Take the last learning episode only
+
         label = policy.replace("-", " ").capitalize()
         pos = hist_pos.mean(axis=0)
         pos_disp = hist_pos.std(axis=0)
