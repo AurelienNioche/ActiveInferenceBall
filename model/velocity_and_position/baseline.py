@@ -1,43 +1,17 @@
 import numpy as np
-from . transition import compute_transition_position_matrix, compute_transition_velocity_matrix
-from . helpers import compute_q
+from model.velocity_and_position.base import *
 
 
-def run_baseline_pragmatic(
-        timestep, position, velocity, action,
-        n_run,
-        friction_factor,
-        n_sample_transition_velocity,
-        seed_transition_velocity):
+def run_baseline_pragmatic(n_sample=20):
 
-    n_timestep = len(timestep)
-    n_velocity = len(velocity)
-    n_position = len(position)
-
-    # Transition matrix for position (dimensions: p v p)
-    transition_position_pvp = compute_transition_position_matrix(
-        timestep=timestep,
-        position=position,
-        velocity=velocity)
-
-    # Transition matrix for velocity (dimensions: t a p v v)
-    transition_velocity_tapvv = compute_transition_velocity_matrix(
-        timestep=timestep,
-        position=position,
-        velocity=velocity,
-        action=action,
-        n_sample=n_sample_transition_velocity,
-        seed=seed_transition_velocity,
-        friction_factor=friction_factor)
-    
     policies = ["all-one", "all-zero", "random", "max-expected-velocity"]
     results = []
 
     for policy in policies:
-        hist_pos = np.zeros((n_run, n_timestep))
+        hist_pos = np.zeros((n_sample, n_timestep))
         hist_vel = np.zeros_like(hist_pos)
     
-        for sample in range(n_run):
+        for sample in range(n_sample):
             p_idx = np.absolute(position).argmin()  # Something close to 0
             v_idx = np.absolute(velocity).argmin()  # Something close to 0
     

@@ -1,27 +1,38 @@
 import numpy as np
-from scipy.stats import norm
+from scipy.stats import \
+    norm
+
+np.random.seed(123)
+
+n_timestep = 6
+n_velocity = 20
+n_action = 2
+n_position = 50
+
+timestep = np.linspace(0, 1.0, n_timestep)
+position = np.linspace(0, 2.0, n_position)
+velocity = np.linspace(0., 3.0, n_velocity)
+action = np.arange(n_action)
+
+max_velocity = 10.0
+friction_factor = 0.5
+
+n_sample = 300
 
 
-def compute_transition_velocity_matrix(
-        timestep, position, velocity, action, friction_factor, n_sample, seed):
+def rbf(_x, alpha=0.05, length=0.1):
+    sq_dist = (
+        np.sum(_x**2, axis=1)[:, None]
+        + np.sum(_x**2, axis=1)[None, :]
+        - 2 * np.dot(_x, _x.T)
+    )
+    sigma = alpha**2 * np.exp(-0.5 * sq_dist / length**2)
+    return sigma
 
-    np.random.seed(seed)
 
-    def rbf(_x, alpha=0.05, length=0.1):
-        sq_dist = (
-            np.sum(_x**2, axis=1)[:, None]
-            + np.sum(_x**2, axis=1)[None, :]
-            - 2 * np.dot(_x, _x.T)
-        )
-        sigma = alpha**2 * np.exp(-0.5 * sq_dist / length**2)
-        return sigma
+def compute_transition_velocity_matrix():
 
     assert len(action) == 2, "Only two actions are supported"
-
-    n_timestep = len(timestep)
-    n_position = len(position)
-    n_velocity = len(velocity)
-    n_action = len(action)
 
     x = np.column_stack([x.ravel() for x in np.meshgrid(timestep, position)])
 
@@ -57,14 +68,7 @@ def compute_transition_velocity_matrix(
     return transition_velocity_tapvv
 
 
-def compute_transition_position_matrix(timestep, position, velocity):
-    """
-    Transition matrix for position (dimensions: p v p)
-    :return:
-    """
-    n_timestep = len(timestep)
-    n_position = len(position)
-    n_velocity = len(velocity)
+def build_transition_position_pvp():
 
     transition_position_pvp = np.zeros((n_position, n_velocity, n_position))
     dt = (max(timestep) - min(timestep)) / (n_timestep - 1)
@@ -83,3 +87,5 @@ def compute_transition_position_matrix(timestep, position, velocity):
             else:
                 transition_position_pvp[p_idx, v_idx, :] /= denominator
     return transition_position_pvp
+
+transition_position_pvp = build_transition_position_pvp()

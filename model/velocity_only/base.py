@@ -48,7 +48,7 @@ p = norm.cdf(
     loc=pref_mu,
     scale=pref_sigma)
 p /= p.sum()
-log_prior = np.log(p)
+log_prior = np.log(p)  # np.log(softmax(np.arange(n_position)))
 
 # Compute velocity transitions --------------------------------------------------------------------------
 
