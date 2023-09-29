@@ -11,9 +11,9 @@ def square_exponential_kernel(x, alpha, length):
 np.random.seed(123)
 
 n_timestep = 10
-n_velocity = 50
+n_velocity = 20
 n_action = 2
-n_position = 100
+n_position = 50
 min_position, max_position = 0.0, 4.0
 min_velocity, max_velocity = -2.0, 4.0
 min_timestep, max_timestep = 0.0, 1.0
