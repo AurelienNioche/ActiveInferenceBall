@@ -1,6 +1,7 @@
 import numpy as np
-from scipy.stats import \
-    norm
+from scipy.special import \
+    softmax
+from scipy.stats import norm
 
 np.random.seed(123)
 
@@ -19,6 +20,13 @@ friction_factor = 0.5
 
 n_sample = 300
 
+# compute preferences ------------------------------------------------------------------------------------
+
+log_prior = np.log(softmax(np.arange(n_position)))
+
+
+# helper functions ---------------------------------------------------------------------------------------
+
 
 def rbf(_x, alpha=0.05, length=0.1):
     sq_dist = (
@@ -30,7 +38,10 @@ def rbf(_x, alpha=0.05, length=0.1):
     return sigma
 
 
-def compute_transition_velocity_matrix():
+# Compute velocity transitions --------------------------------------------------------------------------
+
+
+def build_transition_velocity_tapvv():
 
     assert len(action) == 2, "Only two actions are supported"
 
@@ -40,7 +51,7 @@ def compute_transition_velocity_matrix():
     mu[0] = 0.8 + 0.6 * np.cos(6 * x[:, 0] - 2)  # + 0.3*np.sin(4*x[:,1] + 3)
     mu[1] = 0.8 + 0.7 * np.cos(3 * x[:, 0] - 4)  # + 0.3*np.sin(4*x[:,1] + 3)
 
-    transition_velocity_tapvv = np.zeros(
+    tr = np.zeros(
         (n_timestep, n_action, n_position, n_velocity, n_velocity)
     )
     for a in action:
@@ -63,29 +74,36 @@ def compute_transition_velocity_matrix():
                         density = hist / sum_hist
                     else:
                         density = hist
-                    transition_velocity_tapvv[t_idx, a, p_idx, v_idx, :] = density
+                    tr[t_idx, a, p_idx, v_idx, :] = density
 
-    return transition_velocity_tapvv
+    return tr
+
+
+transition_velocity_tapvv = build_transition_velocity_tapvv()
+
+
+# Compute position transitions --------------------------------------------------------------------------
 
 
 def build_transition_position_pvp():
 
-    transition_position_pvp = np.zeros((n_position, n_velocity, n_position))
+    tr = np.zeros((n_position, n_velocity, n_position))
     dt = (max(timestep) - min(timestep)) / (n_timestep - 1)
     dp = (max(position) - min(position)) / (n_position - 1)
     for p_idx, p in enumerate(position):
         for v_idx, v in enumerate(velocity):
             for p2_idx, p2 in enumerate(position):
-                transition_position_pvp[p_idx, v_idx, p2_idx] = norm.pdf(
+                tr[p_idx, v_idx, p2_idx] = norm.pdf(
                     p2, loc=p + dt * v, scale=dp / 4
                 )
-            denominator = transition_position_pvp[p_idx, v_idx, :].sum()
+            denominator = tr[p_idx, v_idx, :].sum()
             if denominator == 0:
                 # Handle division by zero here
                 # For example, set the result to a specific value
-                transition_position_pvp[p_idx, v_idx, :] = 0
+                tr[p_idx, v_idx, :] = 0
             else:
-                transition_position_pvp[p_idx, v_idx, :] /= denominator
-    return transition_position_pvp
+                tr[p_idx, v_idx, :] /= denominator
+    return tr
+
 
 transition_position_pvp = build_transition_position_pvp()

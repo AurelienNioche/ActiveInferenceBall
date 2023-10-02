@@ -2,7 +2,7 @@ import numpy as np
 from scipy.spatial.distance import \
     cdist
 from scipy.stats import norm
-
+from scipy.special import softmax
 
 def square_exponential_kernel(x, alpha, length):
     return alpha**2 * np.exp(-0.5 * cdist(x.reshape(-1, 1), x.reshape(-1, 1), 'sqeuclidean')/length**2)
@@ -43,12 +43,13 @@ transition_position_sigma = 0.05
 
 # Compute preferences ------------------------------------------------------------------------------------
 
-p = norm.cdf(
-    position,
-    loc=pref_mu,
-    scale=pref_sigma)
-p /= p.sum()
-log_prior = np.log(p)  # np.log(softmax(np.arange(n_position)))
+# p = norm.cdf(
+#     position,
+#     loc=pref_mu,
+#     scale=pref_sigma)
+# p /= p.sum()
+# log_prior = np.log(p)
+log_prior = np.log(softmax(np.arange(n_position)))
 
 # Compute velocity transitions --------------------------------------------------------------------------
 

@@ -1,4 +1,5 @@
-import numpy as np
+from model.helpers import \
+    compute_q
 from model.velocity_and_position.base import *
 
 
