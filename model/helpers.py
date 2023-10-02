@@ -1,8 +1,23 @@
 import numpy as np
 from scipy.special import digamma, gammaln
+from scipy.spatial.distance import cdist
 
 
-def compute_q(alpha):
+def square_exponential_kernel(x, alpha, length):
+    # sq_dist = (
+    #     np.sum(x**2, axis=1)[:, None]
+    #     + np.sum(x**2, axis=1)[None, :]
+    #     - 2 * np.dot(x, x.T)
+    # )
+    # sigma = alpha**2 * np.exp(-0.5 * sq_dist / length**2)
+    if len(x.shape) == 1:
+        x = x.reshape(-1, 1)
+    sq_dist = np.sum(x**2, 1).reshape(-1, 1) + np.sum(x**2, 1) - 2 * np.dot(x, x.T)
+    return alpha**2 * np.exp(-0.5 * sq_dist / length**2)
+    # return sigma #alpha**2 * np.exp(-0.5 * cdist(x.reshape(-1, 1), x.reshape(-1, 1), 'sqeuclidean')/length**2)
+
+
+def normalize_last_column(alpha):
     sum_col = np.sum(alpha, axis=-1)
     sum_col[sum_col <= 0.] = 1
     return alpha / np.expand_dims(sum_col, axis=-1)

@@ -1,5 +1,4 @@
-from model.helpers import \
-    compute_q
+from model.helpers import normalize_last_column
 from model.velocity_and_position.base import *
 
 
@@ -30,12 +29,11 @@ def run_baseline_pragmatic(n_sample=20):
                     for a in range(2):
                         e_v[a] = np.average(
                             velocity,
-                            weights=transition_velocity_tapvv[t_idx, a, p_idx, v_idx, :],
-                        )
+                            weights=transition_velocity_atpvv[a, t_idx, p_idx, v_idx, :])
                     a = e_v.argmax()
                 else:
                     raise ValueError
-                tr_vel = transition_velocity_tapvv[t_idx, a, p_idx, v_idx, :]
+                tr_vel = transition_velocity_atpvv[a, t_idx, p_idx, v_idx, :]
                 # print(t_idx, a, p_idx, v_idx)
                 v_idx = np.random.choice(np.arange(n_velocity), p=tr_vel)
                 tr_pos = transition_position_pvp[p_idx, v_idx, :]
@@ -52,37 +50,7 @@ def run_baseline_pragmatic(n_sample=20):
     return results
 
 
-def run_baseline_epistemic(
-        timestep,
-        position,
-        velocity,
-        action,
-        friction_factor,
-        n_episode_per_run,
-        n_run,
-        seed_transition_velocity,
-        n_sample_transition_velocity):
-
-    n_timestep = len(timestep)
-    n_velocity = len(velocity)
-    n_position = len(position)
-    n_action = len(action)
-
-    # Transition matrix for position (dimensions: p v p)
-    transition_position_pvp = compute_transition_position_matrix(
-        timestep=timestep,
-        position=position,
-        velocity=velocity)
-
-    # Transition matrix for velocity (dimensions: t a p v v)
-    transition_velocity_tapvv = compute_transition_velocity_matrix(
-        timestep=timestep,
-        position=position,
-        velocity=velocity,
-        action=action,
-        n_sample=n_sample_transition_velocity,
-        seed=seed_transition_velocity,
-        friction_factor=friction_factor)
+def run_baseline_epistemic(n_episode_per_run, n_run):
 
     hist_err = np.zeros((n_run, n_episode_per_run * n_timestep))
     
@@ -94,7 +62,7 @@ def run_baseline_epistemic(
     
         if sample == 0:
             error = np.mean(
-                (transition_velocity_tapvv - compute_q(alpha_tapvv)) ** 2
+                (transition_velocity_tapvv - normalize_last_column(alpha_tapvv)) ** 2
             )
             print(f"Initial error {error:.2f}")
     
@@ -126,7 +94,7 @@ def run_baseline_epistemic(
     
                 # Log
                 error = np.mean(
-                    (transition_velocity_tapvv - compute_q(alpha_tapvv)) ** 2
+                    (transition_velocity_tapvv - normalize_last_column(alpha_tapvv)) ** 2
                 )
                 # print(error)
                 hist_err[sample, epoch] = error

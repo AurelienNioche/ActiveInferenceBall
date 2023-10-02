@@ -1,12 +1,7 @@
 import numpy as np
-from scipy.spatial.distance import \
-    cdist
 from scipy.stats import norm
 from scipy.special import softmax
-
-def square_exponential_kernel(x, alpha, length):
-    return alpha**2 * np.exp(-0.5 * cdist(x.reshape(-1, 1), x.reshape(-1, 1), 'sqeuclidean')/length**2)
-
+from model.helpers import square_exponential_kernel, normalize_last_column
 
 np.random.seed(123)
 
@@ -76,12 +71,12 @@ def build_transition_velocity_tavv():
     for v_idx, v in enumerate(velocity):
         for a_idx, a in enumerate(action):
             for t_idx, t in enumerate(timestep):
-                hist, bins = np.histogram(new_v[a, :, t_idx, v_idx], bins=bins)
-                density = hist / np.sum(hist)
-                assert np.isclose(np.sum(density), 1.0), "Density does not sum to 1"
-                tr[t_idx, a, v_idx, :] = density
-
-    return tr
+                tr[t_idx, a, v_idx, :], _ = np.histogram(new_v[a, :, t_idx, v_idx], bins=bins)
+                # tr[t_idx, a, v_idx, :] = hist
+                # density = hist / np.sum(hist)
+                # assert np.isclose(np.sum(density), 1.0), "Density does not sum to 1"
+                # tr[t_idx, a, v_idx, :] = density
+    return normalize_last_column(tr)
 
 
 transition_velocity_tavv = build_transition_velocity_tavv()
@@ -91,15 +86,10 @@ transition_velocity_tavv = build_transition_velocity_tavv()
 
 def build_transition_position_pvp():
     tr = np.zeros((n_position, n_velocity, n_position))
-    for p_idx, p in enumerate(
-            position):
-        for v_idx, v in enumerate(
-                velocity):
+    for p_idx, p in enumerate(position):
+        for v_idx, v in enumerate(velocity):
             tr[p_idx, v_idx, :] = norm.pdf(position, loc=p + (1 / n_timestep) * v, scale=transition_position_sigma)
-            sum_transition = tr[p_idx, v_idx, :].sum()
-            assert sum_transition > 0, "Sum of transition probabilities is 0"
-            tr[p_idx, v_idx, :] /= sum_transition
-    return tr
+    return normalize_last_column(tr)
 
 
 transition_position_pvp = build_transition_position_pvp()

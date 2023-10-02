@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def runs(*args):
-    fig, axes = plt.subplots(nrows=2, figsize=(4, 3))
+def runs(*args, figsize=(4, 3)):
+    fig, axes = plt.subplots(nrows=2, figsize=figsize)
     for i, r in enumerate(args):
         policy = r["policy"]
         hist_pos = r["position"]
@@ -72,20 +72,15 @@ def error(*args):
     plt.show()
 
 
-def q(alpha, title=r"$\alpha$"):
+def q(alpha, title=r"$\alpha$", figsize=(6, 2)):
     plt.rcParams.update({'text.usetex': True})
-    if len(alpha.shape) == 5:
-        n_timestep, n_action, n_position, n_velocity, _ = alpha.shape
-    elif len(alpha.shape) == 4:
-        n_timestep, n_action, n_velocity, _ = alpha.shape
-    else:
-        raise ValueError
-    fig, axes = plt.subplots(
-        ncols=n_timestep,
-        nrows=n_action,
-        figsize=(6, 2))
-    fig.suptitle(title)
     if len(alpha.shape) == 4:
+        n_timestep, n_action, n_velocity, _ = alpha.shape
+        fig, axes = plt.subplots(
+            ncols=n_timestep,
+            nrows=n_action,
+            figsize=(6, 2))
+        fig.suptitle(title)
         for a_idx in range(n_action):
             for t_idx in range(n_timestep):
                 ax = axes[a_idx, t_idx]
@@ -93,7 +88,22 @@ def q(alpha, title=r"$\alpha$"):
                 ax.imshow(img, aspect="auto")
                 ax.get_xaxis().set_ticks([])
                 ax.axes.get_yaxis().set_ticks([])
+        plt.tight_layout()
     elif len(alpha.shape) == 5:
+        n_action, n_timestep, n_position, n_velocity, _ = alpha.shape
+        for a_idx in range(n_action):
+            fig, axes = plt.subplots(
+                nrows=n_position,
+                ncols=n_timestep,
+                figsize=figsize)
+            fig.suptitle(f"{title} - Action {a_idx} (row: pos., col: timestep)", fontsize=8)
+            for t_idx in range(n_timestep):
+                for p_idx in range(n_position):
+                    ax = axes[p_idx, t_idx]
+                    img = alpha[a_idx, t_idx, p_idx, :, :]
+                    ax.imshow(img, aspect="auto")
+                    ax.get_xaxis().set_ticks([])
+                    ax.axes.get_yaxis().set_ticks([])
+            plt.show()
+    else:
         raise ValueError
-
-    fig.tight_layout()
