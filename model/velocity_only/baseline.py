@@ -1,10 +1,10 @@
 import numpy as np
 
 
-def run():
+def run(n_sample_run=20):
 
     from .base import (transition_velocity_tavv, transition_position_pvp, timestep, position,
-                       velocity, n_sample_run, n_timestep, n_velocity, n_position)
+                       velocity, n_timestep, n_velocity, n_position)
 
     runs = []
 
