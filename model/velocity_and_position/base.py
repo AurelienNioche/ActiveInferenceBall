@@ -8,10 +8,10 @@ np.random.seed(123)
 n_timestep = 10
 n_velocity = 10
 n_action = 2
-n_position = 20
+n_position = 10
 
-min_velocity, max_velocity = -1., 2.5
-min_position, max_position = 0.0, 1.5
+min_velocity, max_velocity = -1., 2.
+min_position, max_position = 0.0, 1.1
 min_timestep, max_timestep = 0.0, 1.0
 
 timestep = np.linspace(min_timestep, max_timestep, n_timestep)
@@ -47,7 +47,7 @@ for a in action:
 
 # compute preferences ------------------------------------------------------------------------------------
 
-log_prior = np.log(softmax(np.arange(n_position)**2))
+log_prior = np.log(softmax(np.arange(n_position)))
 
 
 # Compute velocity transitions --------------------------------------------------------------------------
