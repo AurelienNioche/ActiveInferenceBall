@@ -17,7 +17,7 @@ timestep = np.linspace(min_timestep, max_timestep, n_timestep)
 
 velocity = np.linspace(min_velocity, max_velocity, n_velocity)
 action = np.arange(n_action)
-position = np.linspace(min_position, max_position,n_position)
+position = np.linspace(min_position, max_position, n_position)
 
 friction_factor = 0.5
 

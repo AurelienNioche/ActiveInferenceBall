@@ -10,22 +10,21 @@ There are two versions of the model:
 
 ### The 'true' generative model
 
-The 'true' generative model is a Gaussian Process with a squared exponential kernel. 
-
-# Modelling the 'true' ball force as a GP with a squared exponential kernel
+The 'true' generative model is a Gaussian Process with a squared exponential kernel.
 
 We assume that the force of the ball is a Gaussian process with a squared exponential kernel. 
-The kernel is defined as follows:
+The kernel is defined a regular squared exponential kernel:
 $$
 k(x, x') = \alpha^2 \exp\left(-\frac{1}{2l^2} (x - x')^2\right)
 $$
 where $\alpha$ is the amplitude and $l$ is the length scale. 
-We assume that the ball is pushed at the beginning of the game, and that the force is constant throughout the game. The force is sampled from a Gaussian process with the above kernel. The mean of the Gaussian process is a cosine function with a period of $2\pi/6$ and an amplitude of $0.5$. The mean is shifted by $5$ units to the right. The variance of the Gaussian process is $\sigma^2 = k(x, x)$. The following figure shows the mean and the variance of the Gaussian process.
+The mean of the Gaussian process is a cosine function. 
+Note that all of this is completely arbitrary.
 
 
 ### ***Note to Self: Debugging***
 
-* When changing the env, make sure to check that the mesh of grid is not too tight 
+* When changing the env, make sure to check that the mesh of grid is not too tight or too 
   ('oversampling').
 * When changing the env, make sure to check that the distribution used for the preferences gives 
   enough contrast between the different options.
