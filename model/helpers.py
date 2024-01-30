@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.special import digamma, gammaln
-from scipy.spatial.distance import cdist
 
 
 def square_exponential_kernel(x, alpha, length):
